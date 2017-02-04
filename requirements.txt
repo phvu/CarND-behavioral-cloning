@@ -1,0 +1,8 @@
+eventlet
+python-socketio
+tensorflow
+keras
+Pillow
+flask
+pandas
+jupyter
