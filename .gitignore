@@ -91,4 +91,5 @@ ENV/
 .idea/
 venv3/
 data/
+data_udacity/
 .DS_Store
