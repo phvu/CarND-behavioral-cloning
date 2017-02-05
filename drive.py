@@ -25,17 +25,18 @@ sio = socketio.Server()
 app = Flask(__name__)
 model = None
 prev_image_array = None
+throttle = 0.2
 
 
 @sio.on('telemetry')
 def telemetry(sid, data):
 
     # The current steering angle of the car
-    steering_angle = data["steering_angle"]
+    # steering_angle = data["steering_angle"]
     # The current throttle of the car
-    throttle = data["throttle"]
+    # current_throttle = data["throttle"]
     # The current speed of the car
-    speed = data["speed"]
+    # speed = data["speed"]
     # The current image from the center camera of the car
     img_string = data["image"]
     image = Image.open(BytesIO(base64.b64decode(img_string)))
@@ -53,8 +54,6 @@ def telemetry(sid, data):
         print(ex)
         raise
 
-    # The driving model currently just outputs a constant throttle. Feel free to edit this.
-    throttle = 0.2
     print(steering_angle, throttle)
     send_control(steering_angle, throttle)
 
@@ -76,9 +75,12 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Remote Driving')
     parser.add_argument('model', type=str,
                         help='Path to model definition h5. Model should be on the same path.')
+    parser.add_argument('--throttle', '-t', type=float, default=0.4,
+                        help='Path to model definition h5. Model should be on the same path.')
     args = parser.parse_args()
 
     model = load_model(args.model)
+    throttle = args.throttle
 
     # wrap Flask application with engineio's middleware
     app = socketio.Middleware(sio, app)
