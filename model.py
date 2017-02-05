@@ -1,7 +1,9 @@
+import os
 from keras.layers import Dense, Activation, Reshape, Conv2D, MaxPooling2D, Input
 from keras.layers.normalization import BatchNormalization
 from keras.models import Model
-from keras.optimizers import SGD
+from keras.optimizers import Nadam
+from keras.callbacks import ModelCheckpoint
 
 # from data_udacity_reader import data_generator, count_dataset
 from data_reader import data_generator, count_dataset
@@ -54,17 +56,22 @@ def train():
 
     m = create_model(input_shape=input_shape)
 
-    optimizer = SGD(lr=0.01, momentum=0.9, decay=0.8, nesterov=False)
+    # optimizer = SGD(lr=0.01, momentum=0.9, decay=0.8, nesterov=False)
+    optimizer = Nadam()
     m.compile(loss='mean_squared_error', optimizer=optimizer, metrics=[])
 
     cnts = count_dataset()
     print('Training size: {}, Validation size: {}'.format(*cnts))
 
+    checkpointer = ModelCheckpoint(filepath=os.path.join(os.path.split(__file__)[0], 'model.h5'),
+                                   verbose=1, save_best_only=True)
+
     history = m.fit_generator(data_generator(batch_size=batch_size, input_shape=input_shape, val_set=False),
                               samples_per_epoch=cnts[0], nb_epoch=epochs, verbose=1,
                               validation_data=data_generator(batch_size=batch_size,
                                                              input_shape=input_shape, val_set=True),
-                              nb_val_samples=cnts[1], pickle_safe=True)
+                              nb_val_samples=cnts[1], pickle_safe=True,
+                              callbacks=[checkpointer])
 
     score = m.evaluate_generator(data_generator(batch_size=batch_size, input_shape=input_shape, val_set=True),
                                  val_samples=cnts[1], pickle_safe=True)
