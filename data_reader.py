@@ -16,7 +16,7 @@ def load_dataset():
         df = pd.read_csv(log_file)
     else:
         df = None
-        for sub_dir in ('lap001', 'lap002', 'lap003', 'lap004'):
+        for sub_dir in ('lap001',): # ('lap001', 'lap002', 'lap003', 'lap004'):
             df_sub = pd.read_csv(os.path.join(DATA_PATH, sub_dir, 'driving_log.csv'), header=None,
                                  names=['center', 'left', 'right', 'steering', 'throttle', 'brake', 'speed'])
             if df is None:
