@@ -47,6 +47,7 @@ def data_generator(batch_size=64, input_shape=(160, 318, 3), val_set=True):
             file_path = df.loc[idx, 'center']
             file_path = os.path.join(DATA_PATH, file_path[file_path.index('lap00'):])
             img = imread(file_path)
+            img = ((img / 255.) - 0.5) * 2
             x[j, :, :, :] = img[:, 1:-1, :]
             y[j, 0] = df.loc[idx, 'steering']
         yield x, y

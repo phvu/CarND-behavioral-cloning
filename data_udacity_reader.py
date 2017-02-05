@@ -39,6 +39,7 @@ def data_generator(batch_size=64, input_shape=(160, 318, 3), val_set=True):
         y = np.zeros((batch_size, 1))
         for j, idx in enumerate(np.random.choice(len(df), batch_size, replace=False)):
             img = imread(os.path.join(DATA_PATH, df.loc[idx, 'center']))
+            img = ((img / 255.) - 0.5) * 2
             x[j, :, :, :] = img[:, 1:-1, :]
             y[j, 0] = df.loc[idx, 'steering']
         yield x, y

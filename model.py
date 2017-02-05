@@ -33,7 +33,7 @@ def create_model(input_shape=(160, 318, 3)):
     x = Activation('relu', name='conv4_act')(x)
 
     # 1 x 1 x 1024
-    x = Reshape(1024)(x)
+    x = Reshape((1024,))(x)
     x = Dense(1024, name='ff1')(x)
     x = BatchNormalization(name='ff1_bn')(x)
     x = Activation('relu', name='ff1_act')(x)
