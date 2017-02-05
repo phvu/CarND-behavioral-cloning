@@ -1,17 +1,16 @@
-from keras.layers import Dense, Activation, Flatten, Conv2D, MaxPooling2D, Input
+from keras.layers import Dense, Activation, Reshape, Conv2D, MaxPooling2D, Input
 from keras.layers.normalization import BatchNormalization
 from keras.models import Model
 from keras.optimizers import SGD
 
-from data_udacity_reader import data_generator, count_dataset
+# from data_udacity_reader import data_generator, count_dataset
+from data_reader import data_generator, count_dataset
 
 
-def create_model(batch_size=64, input_shape=(160, 318, 3)):
+def create_model(input_shape=(160, 318, 3)):
     img_input = Input(shape=input_shape)
 
-    x = ((img_input / 255.) - 0.5) * 2
-
-    x = Conv2D(128, 4, 4, subsample=(2, 4), bias=False, name='conv1', input_length=batch_size)(x)
+    x = Conv2D(128, 4, 4, subsample=(2, 4), bias=False, name='conv1')(img_input)
     x = BatchNormalization(name='conv1_bn')(x)
     x = Activation('relu', name='conv1_act')(x)
     x = MaxPooling2D((2, 2))(x)
@@ -34,7 +33,7 @@ def create_model(batch_size=64, input_shape=(160, 318, 3)):
     x = Activation('relu', name='conv4_act')(x)
 
     # 1 x 1 x 1024
-    x = Flatten(name='flatten')(x)
+    x = Reshape(1024)(x)
     x = Dense(1024, name='ff1')(x)
     x = BatchNormalization(name='ff1_bn')(x)
     x = Activation('relu', name='ff1_act')(x)
@@ -53,7 +52,7 @@ def train():
     batch_size = 64
     input_shape = (160, 318, 3)
 
-    m = create_model(batch_size=batch_size, input_shape=input_shape)
+    m = create_model(input_shape=input_shape)
 
     optimizer = SGD(lr=0.01, momentum=0.9, decay=0.8, nesterov=False)
     m.compile(loss='mean_squared_error', optimizer=optimizer, metrics=[])
