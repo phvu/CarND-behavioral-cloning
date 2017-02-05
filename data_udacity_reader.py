@@ -32,12 +32,12 @@ def count_dataset():
 
 def data_generator(batch_size=64, input_shape=(160, 318, 3), val_set=True):
     df = load_dataset()
-    df = df[df[VALIDATION_COLUMN] == (1 if val_set else 0), :]
+    df = df[df[VALIDATION_COLUMN] == (1 if val_set else 0)]
 
     while 1:
         x = np.zeros((batch_size, input_shape[0], input_shape[1], input_shape[2]))
         y = np.zeros((batch_size, 1))
-        for j, idx in enumerate(np.random.choice(len(df), batch_size, replace=False)):
+        for j, idx in enumerate(np.random.choice(df.index, batch_size, replace=False)):
             img = imread(os.path.join(DATA_PATH, df.loc[idx, 'center']))
             img = ((img / 255.) - 0.5) * 2
             x[j, :, :, :] = img[:, 1:-1, :]
