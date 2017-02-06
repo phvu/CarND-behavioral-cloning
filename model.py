@@ -20,7 +20,7 @@ def create_model(input_shape=(160, 318, 3)):
     x = MaxPooling2D((2, 2))(x)
 
     # 79 x 79 x 256
-    x = Conv2D(256, 3, 3, subsample=(2, 2), bias=False, name='conv1')(img_input)
+    x = Conv2D(256, 3, 3, subsample=(2, 2), bias=False, name='conv1')(x)
     # x = BatchNormalization(name='conv1_bn')(x)
     x = Activation('relu', name='conv1_act')(x)
     x = MaxPooling2D((2, 2))(x)
