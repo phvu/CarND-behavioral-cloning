@@ -41,8 +41,7 @@ def telemetry(sid, data):
     img_string = data["image"]
     image = Image.open(BytesIO(base64.b64decode(img_string)))
     image_array = np.asarray(image)
-    transformed_image_array = image_array[None, :, 1:-1, :]
-    transformed_image_array = ((transformed_image_array / 255.) - 0.5) * 2
+    transformed_image_array = (image_array[None, :, 1:-1, :] / 127.5) - 1
 
     # print('angle: {}, throttle: {}, speed: {}, img: {}'.format(steering_angle, throttle,
     #                                                            speed, transformed_image_array.shape))
@@ -64,10 +63,10 @@ def connect(sid, environ):
     send_control(0, 0)
 
 
-def send_control(steering_angle, throttle):
+def send_control(steering_angle, _throttle):
     sio.emit("steer", data={
         'steering_angle': steering_angle.__str__(),
-        'throttle': throttle.__str__()
+        'throttle': _throttle.__str__()
     }, skip_sid=True)
 
 
