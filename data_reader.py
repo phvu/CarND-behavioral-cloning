@@ -32,8 +32,14 @@ def load_dataset():
 
 def count_dataset(batch_size):
     df = load_dataset()
-    valid_size = np.sum(df[VALIDATION_COLUMN] == 1)
-    return len(df) - valid_size, valid_size
+    valid_size = 2 * np.sum(df[VALIDATION_COLUMN] == 1)
+    train_size = (((2 * len(df)) - valid_size) // batch_size) * batch_size
+    return train_size, valid_size
+
+
+def _read_image(file_path):
+    img = imread(os.path.join(DATA_PATH, file_path.strip()))
+    return (img[:, 1:-1, :] / 127.5) - 1
 
 
 def data_generator(batch_size=64, input_shape=(160, 318, 3), val_set=True):
@@ -43,11 +49,22 @@ def data_generator(batch_size=64, input_shape=(160, 318, 3), val_set=True):
     while 1:
         x = np.zeros((batch_size, input_shape[0], input_shape[1], input_shape[2]))
         y = np.zeros((batch_size, 1))
-        for j, idx in enumerate(np.random.choice(df.index, batch_size, replace=False)):
+        j = 0
+
+        while j < batch_size:
+            idx = np.random.choice(df.index, batch_size, replace=False)[0]
             file_path = df.loc[idx, 'center']
             file_path = os.path.join(DATA_PATH, file_path[file_path.index('lap00'):])
-            img = imread(file_path)
-            img = ((img / 255.) - 0.5) * 2
-            x[j, :, :, :] = img[:, 1:-1, :]
-            y[j, 0] = df.loc[idx, 'steering']
+            img = _read_image(file_path)
+            steering = df.loc[idx, 'steering']
+
+            x[j, :, :, :] = img
+            y[j, 0] = steering
+            j += 1
+
+            if j < batch_size:
+                x[j, :, :, :] = img[:, ::-1, :]
+                y[j, 0] = -steering
+                j += 1
+
         yield x, y

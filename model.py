@@ -7,10 +7,8 @@ from keras.layers.normalization import BatchNormalization
 from keras.models import Model
 from keras.optimizers import Nadam
 
-from data_udacity_reader import data_generator, count_dataset
-
-
-# from data_reader import data_generator, count_dataset
+# from data_udacity_reader import data_generator, count_dataset
+from data_reader import data_generator, count_dataset
 
 
 def create_model(input_shape=(160, 318, 3)):
