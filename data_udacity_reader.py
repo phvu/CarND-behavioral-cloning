@@ -31,7 +31,7 @@ def count_dataset():
 
 
 def _read_image(file_path):
-    img = imread(os.path.join(DATA_PATH, file_path))
+    img = imread(os.path.join(DATA_PATH, file_path.strip()))
     return (img[:, 1:-1, :] / 127.5) - 1
 
 
