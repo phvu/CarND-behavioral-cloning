@@ -6,7 +6,7 @@ from scipy.ndimage import imread
 
 DATA_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'data_udacity'))
 VALIDATION_COLUMN = 'valset'
-VALIDATION_RATIO = 0.2
+VALIDATION_RATIO = 0.4
 
 
 def load_dataset():
@@ -68,15 +68,15 @@ def data_generator(batch_size=64, input_shape=(160, 318, 3), val_set=True):
 
                 if j < batch_size and steering < 0:
                     # left turn
-                    j = add_sample(_read_image(df.loc[idx, 'left']), steering * 0.8, j)
+                    j = add_sample(_read_image(df.loc[idx, 'left']), steering * 0.95, j)
                     if j < batch_size:
-                        j = add_sample(_read_image(df.loc[idx, 'right']), steering * 1.2, j)
+                        j = add_sample(_read_image(df.loc[idx, 'right']), steering * 1.05, j)
 
                 if j < batch_size and steering > 0:
                     # right turn
-                    j = add_sample(_read_image(df.loc[idx, 'right']), steering * 0.8, j)
+                    j = add_sample(_read_image(df.loc[idx, 'right']), steering * 0.95, j)
                     if j < batch_size:
-                        j = add_sample(_read_image(df.loc[idx, 'left']), steering * 1.2, j)
+                        j = add_sample(_read_image(df.loc[idx, 'left']), steering * 1.05, j)
 
         yield x, y
 
