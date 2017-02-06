@@ -1,11 +1,15 @@
+import argparse
 import os
+
+from keras.callbacks import ModelCheckpoint
 from keras.layers import Dense, Activation, Reshape, Conv2D, MaxPooling2D, Input
 from keras.layers.normalization import BatchNormalization
 from keras.models import Model
 from keras.optimizers import Nadam
-from keras.callbacks import ModelCheckpoint
 
 from data_udacity_reader import data_generator, count_dataset
+
+
 # from data_reader import data_generator, count_dataset
 
 
@@ -49,7 +53,7 @@ def create_model(input_shape=(160, 318, 3)):
     return Model(input=img_input, output=predictions)
 
 
-def train():
+def train(model_path='model.h5'):
     epochs = 10
     batch_size = 64
     input_shape = (160, 318, 3)
@@ -60,10 +64,10 @@ def train():
     optimizer = Nadam()
     m.compile(loss='mean_squared_error', optimizer=optimizer, metrics=[])
 
-    cnts = count_dataset()
+    cnts = count_dataset(batch_size)
     print('Training size: {}, Validation size: {}'.format(*cnts))
 
-    checkpointer = ModelCheckpoint(filepath=os.path.join(os.path.split(__file__)[0], 'model.h5'),
+    checkpointer = ModelCheckpoint(filepath=os.path.join(os.path.split(__file__)[0], model_path),
                                    verbose=1, save_best_only=True)
 
     history = m.fit_generator(data_generator(batch_size=batch_size, input_shape=input_shape, val_set=False),
@@ -76,10 +80,15 @@ def train():
     score = m.evaluate_generator(data_generator(batch_size=batch_size, input_shape=input_shape, val_set=True),
                                  val_samples=cnts[1], pickle_safe=True)
     print('Validation MSE:', score)
-    m.save('model.h5')
+    m.save(model_path)
 
     return m, history
 
 
 if __name__ == '__main__':
-    train()
+    parser = argparse.ArgumentParser(description='Remote Driving')
+    parser.add_argument('model', type=str,
+                        help='Path to model definition h5 to be saved')
+    args = parser.parse_args()
+
+    train(args.model)

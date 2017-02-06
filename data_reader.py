@@ -30,7 +30,7 @@ def load_dataset():
     return df
 
 
-def count_dataset():
+def count_dataset(batch_size):
     df = load_dataset()
     valid_size = np.sum(df[VALIDATION_COLUMN] == 1)
     return len(df) - valid_size, valid_size

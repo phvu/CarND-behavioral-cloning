@@ -24,10 +24,11 @@ def load_dataset():
     return df
 
 
-def count_dataset():
+def count_dataset(batch_size):
     df = load_dataset()
     valid_size = np.sum(df[VALIDATION_COLUMN] == 1)
-    return len(df) - valid_size, valid_size
+    train_size = ((len(df) - valid_size) * 4 // batch_size) * batch_size
+    return train_size, valid_size
 
 
 def _read_image(file_path):
@@ -59,21 +60,23 @@ def data_generator(batch_size=64, input_shape=(160, 318, 3), val_set=True):
 
             j = add_sample(img, steering, j)
 
-            if j < batch_size:
-                # horizontally flip the image
-                j = add_sample(img[:, ::-1, :], -steering, j)
+            if not val_set:
 
-            if j < batch_size and steering < 0:
-                # left turn
-                j = add_sample(_read_image(df.loc[idx, 'left']), steering * 0.8, j)
                 if j < batch_size:
-                    j = add_sample(_read_image(df.loc[idx, 'right']), steering * 1.2, j)
+                    # horizontally flip the image
+                    j = add_sample(img[:, ::-1, :], -steering, j)
 
-            if j < batch_size and steering > 0:
-                # right turn
-                j = add_sample(_read_image(df.loc[idx, 'right']), steering * 0.8, j)
-                if j < batch_size:
-                    j = add_sample(_read_image(df.loc[idx, 'left']), steering * 1.2, j)
+                if j < batch_size and steering < 0:
+                    # left turn
+                    j = add_sample(_read_image(df.loc[idx, 'left']), steering * 0.8, j)
+                    if j < batch_size:
+                        j = add_sample(_read_image(df.loc[idx, 'right']), steering * 1.2, j)
+
+                if j < batch_size and steering > 0:
+                    # right turn
+                    j = add_sample(_read_image(df.loc[idx, 'right']), steering * 0.8, j)
+                    if j < batch_size:
+                        j = add_sample(_read_image(df.loc[idx, 'left']), steering * 1.2, j)
 
         yield x, y
 
