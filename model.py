@@ -14,36 +14,37 @@ from data_reader import data_generator, count_dataset
 def create_model(input_shape=(160, 318, 3)):
     img_input = Input(shape=input_shape)
 
-    x = Conv2D(128, 4, 4, subsample=(2, 4), bias=False, name='conv1')(img_input)
-    x = BatchNormalization(name='conv1_bn')(x)
+    x = Conv2D(256, 3, 3, subsample=(1, 2), bias=False, name='conv0')(img_input)
+    # x = BatchNormalization(name='conv0_bn')(x)
+    x = Activation('relu', name='conv0_act')(x)
+    x = MaxPooling2D((2, 2))(x)
+
+    # 79 x 79 x 256
+    x = Conv2D(256, 3, 3, subsample=(2, 2), bias=False, name='conv1')(img_input)
+    # x = BatchNormalization(name='conv1_bn')(x)
     x = Activation('relu', name='conv1_act')(x)
     x = MaxPooling2D((2, 2))(x)
 
-    # 39 x 39 x 128
-    x = Conv2D(256, 3, 3, subsample=(2, 2), bias=False, name='conv2')(x)
-    x = BatchNormalization(name='conv2_bn')(x)
+    # 19 x 19 x 256
+    x = Conv2D(512, 3, 3, subsample=(2, 2), bias=False, name='conv2')(x)
+    # x = BatchNormalization(name='conv2_bn')(x)
     x = Activation('relu', name='conv2_act')(x)
     x = MaxPooling2D((2, 2))(x)
 
-    # 9 x 9 x 256
-    x = Conv2D(512, 3, 3, subsample=(2, 2), bias=False, name='conv3')(x)
-    x = BatchNormalization(name='conv3_bn')(x)
+    # 4 x 4 x 512
+    x = Conv2D(1024, 2, 2, subsample=(2, 2), bias=False, name='conv3')(x)
+    # x = BatchNormalization(name='conv3_bn')(x)
     x = Activation('relu', name='conv3_act')(x)
     x = MaxPooling2D((2, 2), strides=(1, 1))(x)
-
-    # 3 x 3 x 512
-    x = Conv2D(1024, 3, 3, subsample=(1, 1), bias=False, name='conv4')(x)
-    x = BatchNormalization(name='conv4_bn')(x)
-    x = Activation('relu', name='conv4_act')(x)
 
     # 1 x 1 x 1024
     x = Reshape((1024,))(x)
     x = Dense(1024, name='ff1')(x)
-    x = BatchNormalization(name='ff1_bn')(x)
+    # x = BatchNormalization(name='ff1_bn')(x)
     x = Activation('relu', name='ff1_act')(x)
 
     x = Dense(1024, name='ff2')(x)
-    x = BatchNormalization(name='ff2_bn')(x)
+    # x = BatchNormalization(name='ff2_bn')(x)
     x = Activation('relu', name='ff2_act')(x)
 
     predictions = Dense(1, activation='linear', name='predictions')(x)
