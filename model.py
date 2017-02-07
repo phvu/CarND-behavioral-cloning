@@ -79,7 +79,7 @@ def train(model_path='model.h5'):
     score = m.evaluate_generator(data_generator(batch_size=batch_size, input_shape=input_shape, val_set=True),
                                  val_samples=cnts[1], pickle_safe=True)
     print('Validation MSE:', score)
-    m.save(model_path)
+    # m.save(model_path)
 
     return m, history
 
