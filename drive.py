@@ -11,6 +11,7 @@ from PIL import Image
 from PIL import ImageOps
 from flask import Flask, render_template
 from io import BytesIO
+from scipy.misc import imresize
 
 from keras.models import load_model
 
@@ -41,7 +42,8 @@ def telemetry(sid, data):
     img_string = data["image"]
     image = Image.open(BytesIO(base64.b64decode(img_string)))
     image_array = np.asarray(image)
-    transformed_image_array = (image_array[None, :, 1:-1, :] / 127.5) - 1
+    # transformed_image_array = (image_array[None, :, 1:-1, :] / 127.5) - 1
+    transformed_image_array = (imresize(image_array, (80, 160, 3)) / 127.5) - 1.
 
     # print('angle: {}, throttle: {}, speed: {}, img: {}'.format(steering_angle, throttle,
     #                                                            speed, transformed_image_array.shape))
