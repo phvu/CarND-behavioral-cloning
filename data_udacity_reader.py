@@ -6,7 +6,7 @@ from scipy.ndimage import imread
 
 DATA_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'data_udacity'))
 VALIDATION_COLUMN = 'valset'
-VALIDATION_RATIO = 0.4
+VALIDATION_RATIO = 0.3
 
 
 def load_dataset():
