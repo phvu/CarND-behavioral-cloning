@@ -11,7 +11,7 @@ from data_udacity_reader import data_generator, count_dataset
 # from data_reader import data_generator, count_dataset
 
 
-def create_model(input_shape=(160, 318, 3)):
+def create_model_big(input_shape=(160, 318, 3)):
     img_input = Input(shape=input_shape)
 
     x = Conv2D(256, 3, 3, subsample=(1, 2), bias=False, name='conv0')(img_input)
@@ -52,10 +52,46 @@ def create_model(input_shape=(160, 318, 3)):
     return Model(input=img_input, output=predictions)
 
 
+def create_model(input_shape=(80, 160, 3)):
+    img_input = Input(shape=input_shape)
+
+    x = Conv2D(256, 3, 3, subsample=(1, 2), bias=False, name='conv0')(img_input)
+    x = Activation('relu', name='conv0_act')(x)
+    x = MaxPooling2D((2, 2))(x)
+
+    # 39 x 39 x 256
+    x = Conv2D(256, 3, 3, subsample=(2, 2), bias=False, name='conv1')(x)
+    x = Activation('relu', name='conv1_act')(x)
+    x = MaxPooling2D((2, 2))(x)
+
+    # 9 x 9 x 256
+    x = Conv2D(512, 3, 3, subsample=(2, 2), bias=False, name='conv2')(x)
+    x = Activation('relu', name='conv2_act')(x)
+    x = MaxPooling2D((2, 2))(x)
+
+    # 2 x 2 x 512
+    x = Conv2D(1024, 2, 2, subsample=(2, 2), bias=False, name='conv3')(x)
+    x = Activation('relu', name='conv3_act')(x)
+
+    # 1 x 1 x 1024
+    x = Reshape((1024,))(x)
+    x = Dense(1024, name='ff1')(x)
+    # x = BatchNormalization(name='ff1_bn')(x)
+    x = Activation('relu', name='ff1_act')(x)
+
+    x = Dense(1024, name='ff2')(x)
+    # x = BatchNormalization(name='ff2_bn')(x)
+    x = Activation('relu', name='ff2_act')(x)
+
+    predictions = Dense(1, activation='linear', name='predictions')(x)
+
+    return Model(input=img_input, output=predictions)
+
+
 def train(model_path='model.h5'):
     epochs = 10
     batch_size = 64
-    input_shape = (160, 318, 3)
+    input_shape = (80, 160, 3)
 
     m = create_model(input_shape=input_shape)
 

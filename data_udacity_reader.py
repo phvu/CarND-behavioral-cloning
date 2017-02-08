@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 import numpy as np
-from scipy.ndimage import imread
+from scipy.misc import imread, imresize
 
 
 DATA_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'data_udacity'))
@@ -33,7 +33,8 @@ def count_dataset(batch_size):
 
 def _read_image(file_path):
     img = imread(os.path.join(DATA_PATH, file_path.strip()))
-    return (img[:, 1:-1, :] / 127.5) - 1
+    img = imresize(img, (80, 160, 3))
+    return (img / 127.5) - 1
 
 
 def data_generator(batch_size=64, input_shape=(160, 318, 3), val_set=True):
