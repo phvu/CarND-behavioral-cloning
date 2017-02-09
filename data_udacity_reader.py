@@ -27,7 +27,7 @@ def load_dataset():
 def count_dataset(batch_size):
     df = load_dataset()
     valid_size = np.sum(df[VALIDATION_COLUMN] == 1)
-    train_size = ((len(df) - valid_size) * 4 // batch_size) * batch_size
+    train_size = ((len(df) - valid_size) * 3 // batch_size) * batch_size
     return train_size, valid_size
 
 
@@ -65,9 +65,9 @@ def data_generator(batch_size=64, input_shape=(160, 318, 3), val_set=True):
 
             if not val_set:
 
-                if j < batch_size:
+                # if j < batch_size:
                     # horizontally flip the image
-                    j = add_sample(img[:, ::-1, :], -steering, j)
+                #     j = add_sample(img[:, ::-1, :], -steering, j)
 
                 if j < batch_size and steering < 0:
                     # left turn

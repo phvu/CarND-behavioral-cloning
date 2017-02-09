@@ -32,6 +32,7 @@ throttle = 0.2
 @sio.on('telemetry')
 def telemetry(sid, data):
 
+    start_time = time.clock()
     # The current steering angle of the car
     # steering_angle = data["steering_angle"]
     # The current throttle of the car
@@ -55,7 +56,9 @@ def telemetry(sid, data):
         print(ex)
         raise
 
-    print(steering_angle, throttle)
+    end_time = time.clock()
+    print('At {}, processed in {}, steering {}, throttle {}'.format(
+        end_time, end_time - start_time, steering_angle, throttle))
     send_control(steering_angle, throttle)
 
 
