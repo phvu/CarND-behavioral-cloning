@@ -43,6 +43,8 @@ def data_generator(batch_size=64, input_shape=(160, 318, 3), val_set=True):
     """
     df = load_dataset()
     df = df[df[VALIDATION_COLUMN] == (1 if val_set else 0)]
+    steering_increase = 1.1
+    steering_decrease = 0.9
 
     while 1:
         x = np.zeros((batch_size, input_shape[0], input_shape[1], input_shape[2]))
@@ -69,15 +71,15 @@ def data_generator(batch_size=64, input_shape=(160, 318, 3), val_set=True):
 
                 if j < batch_size and steering < 0:
                     # left turn
-                    j = add_sample(_read_image(df.loc[idx, 'left']), steering * 0.95, j)
+                    j = add_sample(_read_image(df.loc[idx, 'left']), steering * steering_decrease, j)
                     if j < batch_size:
-                        j = add_sample(_read_image(df.loc[idx, 'right']), steering * 1.05, j)
+                        j = add_sample(_read_image(df.loc[idx, 'right']), steering * steering_increase, j)
 
                 if j < batch_size and steering > 0:
                     # right turn
-                    j = add_sample(_read_image(df.loc[idx, 'right']), steering * 0.95, j)
+                    j = add_sample(_read_image(df.loc[idx, 'right']), steering * steering_decrease, j)
                     if j < batch_size:
-                        j = add_sample(_read_image(df.loc[idx, 'left']), steering * 1.05, j)
+                        j = add_sample(_read_image(df.loc[idx, 'left']), steering * steering_increase, j)
 
         yield x, y
 
