@@ -27,7 +27,7 @@ def load_dataset():
 def count_dataset(batch_size):
     df = load_dataset()
     valid_size = np.sum(df[VALIDATION_COLUMN] == 1)
-    train_size = ((len(df) - valid_size) * 3 // batch_size) * batch_size
+    train_size = ((len(df) - valid_size) * 6 // batch_size) * batch_size
     return train_size, valid_size
 
 
@@ -65,21 +65,32 @@ def data_generator(batch_size=64, input_shape=(160, 318, 3), val_set=True):
 
             if not val_set:
 
-                # if j < batch_size:
+                if j < batch_size:
                     # horizontally flip the image
-                #     j = add_sample(img[:, ::-1, :], -steering, j)
+                    j = add_sample(img[:, ::-1, :], -steering, j)
 
-                if j < batch_size and steering < 0:
+                img_left = _read_image(df.loc[idx, 'left'])
+                img_right = _read_image(df.loc[idx, 'right'])
+
+                if steering < 0:
                     # left turn
-                    j = add_sample(_read_image(df.loc[idx, 'left']), steering * steering_decrease, j)
                     if j < batch_size:
-                        j = add_sample(_read_image(df.loc[idx, 'right']), steering * steering_increase, j)
-
-                if j < batch_size and steering > 0:
-                    # right turn
-                    j = add_sample(_read_image(df.loc[idx, 'right']), steering * steering_decrease, j)
+                        j = add_sample(img_left, steering * steering_decrease, j)
                     if j < batch_size:
-                        j = add_sample(_read_image(df.loc[idx, 'left']), steering * steering_increase, j)
+                        j = add_sample(img_left[:, ::-1, :], -steering * steering_decrease, j)
+                    if j < batch_size:
+                        j = add_sample(img_right, steering * steering_increase, j)
+                    if j < batch_size:
+                        j = add_sample(img_right[:, ::-1, :], -steering * steering_increase, j)
+                else:
+                    if j < batch_size:
+                        j = add_sample(img_right, steering * steering_decrease, j)
+                    if j < batch_size:
+                        j = add_sample(img_right[:, ::-1, :], -steering * steering_decrease, j)
+                    if j < batch_size:
+                        j = add_sample(img_left, steering * steering_increase, j)
+                    if j < batch_size:
+                        j = add_sample(img_left[:, ::-1, :], -steering * steering_increase, j)
 
         yield x, y
 
