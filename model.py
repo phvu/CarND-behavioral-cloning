@@ -55,31 +55,31 @@ def create_model_big(input_shape=(160, 318, 3)):
 def create_model(input_shape=(80, 160, 3)):
     img_input = Input(shape=input_shape)
 
-    x = Conv2D(256, 3, 3, subsample=(1, 2), bias=False, name='conv0')(img_input)
+    x = Conv2D(32, 3, 3, subsample=(1, 2), bias=False, name='conv0')(img_input)
     x = Activation('relu', name='conv0_act')(x)
     x = MaxPooling2D((2, 2))(x)
 
     # 39 x 39 x 256
-    x = Conv2D(256, 3, 3, subsample=(2, 2), bias=False, name='conv1')(x)
+    x = Conv2D(64, 3, 3, subsample=(2, 2), bias=False, name='conv1')(x)
     x = Activation('relu', name='conv1_act')(x)
     x = MaxPooling2D((2, 2))(x)
 
     # 9 x 9 x 256
-    x = Conv2D(512, 3, 3, subsample=(2, 2), bias=False, name='conv2')(x)
+    x = Conv2D(64, 3, 3, subsample=(2, 2), bias=False, name='conv2')(x)
     x = Activation('relu', name='conv2_act')(x)
     x = MaxPooling2D((2, 2))(x)
 
     # 2 x 2 x 512
-    x = Conv2D(1024, 2, 2, subsample=(2, 2), bias=False, name='conv3')(x)
+    x = Conv2D(128, 2, 2, subsample=(2, 2), bias=False, name='conv3')(x)
     x = Activation('relu', name='conv3_act')(x)
 
     # 1 x 1 x 1024
-    x = Reshape((1024,))(x)
-    x = Dense(1024, name='ff1')(x)
+    x = Reshape((128,))(x)
+    x = Dense(128, name='ff1')(x)
     # x = BatchNormalization(name='ff1_bn')(x)
     x = Activation('relu', name='ff1_act')(x)
 
-    x = Dense(1024, name='ff2')(x)
+    x = Dense(128, name='ff2')(x)
     # x = BatchNormalization(name='ff2_bn')(x)
     x = Activation('relu', name='ff2_act')(x)
 
