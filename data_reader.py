@@ -32,8 +32,8 @@ def load_dataset():
 
 def count_dataset(batch_size):
     df = load_dataset()
-    valid_size = 2 * np.sum(df[VALIDATION_COLUMN] == 1)
-    train_size = (((2 * len(df)) - valid_size) // batch_size) * batch_size
+    valid_size = 1 * np.sum(df[VALIDATION_COLUMN] == 1)
+    train_size = (((1 * len(df)) - valid_size) // batch_size) * batch_size
     return train_size, valid_size
 
 
@@ -63,9 +63,9 @@ def data_generator(batch_size=64, input_shape=(160, 318, 3), val_set=True):
             y[j, 0] = steering
             j += 1
 
-            if j < batch_size:
-                x[j, :, :, :] = img[:, ::-1, :]
-                y[j, 0] = -steering
-                j += 1
+            # if j < batch_size:
+            #     x[j, :, :, :] = img[:, ::-1, :]
+            #     y[j, 0] = -steering
+            #     j += 1
 
         yield x, y
