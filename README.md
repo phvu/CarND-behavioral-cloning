@@ -183,3 +183,12 @@ I used this training data for training the model. The validation set helped dete
 The model seems to converge after 5 epochs, but I use 10 epochs, and record the best model on the validation set.
 
 Batch size has always been kept at 64.
+
+This is a recording of the vehicle in the autonomous mode with throttle = 0.2:
+
+[![Throttle 0.2](https://img.youtube.com/vi/Yck8opwnZ6U/0.jpg)](https://youtu.be/Yck8opwnZ6U)
+
+With throttle = 0.4, it fluctuates a bit in the beginning, but gets more stable in the second lap (or maybe
+because my machine was spending resource on something else in the beginning):
+
+[![Throttle 0.4](https://img.youtube.com/vi/aaa/0.jpg)](https://youtu.be/aaa)
