@@ -191,4 +191,4 @@ This is a recording of the vehicle in the autonomous mode with throttle = 0.2:
 With throttle = 0.4, it fluctuates a bit in the beginning, but gets more stable in the second lap (or maybe
 because my machine was spending resource on something else in the beginning):
 
-[![Throttle 0.4](https://img.youtube.com/vi/-nxpqMP05Zc/0.jpg)](https://youtu.be/https://youtu.be/-nxpqMP05Zc)
+[![Throttle 0.4](https://img.youtube.com/vi/-nxpqMP05Zc/0.jpg)](https://youtu.be/-nxpqMP05Zc)
