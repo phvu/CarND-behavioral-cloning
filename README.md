@@ -11,13 +11,11 @@ The goals / steps of this project are the following:
 
 [//]: # (Image References)
 
-[image1]: ./examples/placeholder.png "Model Visualization"
-[image2]: ./examples/placeholder.png "Grayscaling"
-[image3]: ./examples/placeholder_small.png "Recovery Image"
-[image4]: ./examples/placeholder_small.png "Recovery Image"
-[image5]: ./examples/placeholder_small.png "Recovery Image"
-[image6]: ./examples/placeholder_small.png "Normal Image"
-[image7]: ./examples/placeholder_small.png "Flipped Image"
+[image2]: ./img/center_2017_01_21_13_34_35_626.jpg "Center camera"
+[image3]: ./img/left_2017_01_21_13_34_35_626.jpg "Recovery Image - Left"
+[image4]: ./img/right_2017_01_21_13_34_35_626.jpg "Recovery Image - Right"
+[image5]: ./img/center_2017_01_21_13_34_35_626.jpg "Normal Image"
+[image6]: ./img/center_2017_01_21_13_34_35_626_flipped.jpg "Flipped Image"
 
 ## Rubric Points
 
@@ -46,25 +44,30 @@ The model.py file contains the code for training and saving the convolution neur
 
 ###Model Architecture and Training Strategy
 
-####1. An appropriate model arcthiecture has been employed
+####1. An appropriate model architecture has been employed
 
-My model consists of a convolution neural network with 3x3 filter sizes and depths between 32 and 128 (model.py lines 18-24) 
+My model consists of a convolution neural network with 3x3 filter sizes and depths between 32 and 128 (model.py lines 12-43).
+See next sections for a detail description of the final model.
 
-The model includes RELU layers to introduce nonlinearity (code line 20), and the data is normalized in the model using a Keras lambda layer (code line 18). 
+The model uses ReLU for the nonlinearity, input images are normalized before being fed to the model.
 
 ####2. Attempts to reduce overfitting in the model
 
-The model contains dropout layers in order to reduce overfitting (model.py lines 21). 
+The model was intentionally kept small (~30K parameters) to avoid heavy overfitting. 
+I didn't try dropout for data collected in the first track.
 
-The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
+The model was trained and validated on different data sets to ensure that the model was not overfitting 
+(`data_reader.py` lines 22-23, `model.py` lines 63-68).
+The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
 
 ####3. Model parameter tuning
 
-The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 25).
+The model used Nadam optimizer, so the learning rate was not tuned manually (`model.py` line 54).
 
 ####4. Appropriate training data
 
-Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
+Training data was chosen to keep the vehicle driving on the road. 
+I used a combination of center lane driving, recovering from the left and right sides of the road.
 
 For details about how I created the training data, see the next section. 
 
@@ -72,52 +75,111 @@ For details about how I created the training data, see the next section.
 
 ####1. Solution Design Approach
 
-The overall strategy for deriving a model architecture was to ...
+The overall strategy for deriving a model architecture was to learn the mapping between input image of the center
+ camera to the steering angle. The throttle, brake and speed are not considered. We cast this into a regression problem
+ where the model is trained to output the steering angle, given the input image of the center camera.
 
-My first step was to use a convolution neural network model similar to the ... I thought this model might be appropriate because ...
+My first step was to use a convolutional neural network model. This is well-fitted because the convolutional filters
+in CNNs are designed to capture the visual features exhibit in the input images. 
 
-In order to gauge how well the model was working, I split my image and steering angle data into a training and validation set. I found that my first model had a low mean squared error on the training set but a high mean squared error on the validation set. This implied that the model was overfitting. 
+As a default start, I added BatchNorm to every layer of the architecture, thinking that it would help because I didn't
+normalize the data to zero-mean and unit-variance (I only normalize them to the `[-0.5, 0.5]` range). But then I realized
+that BatchNorm doesn't do any significant improvement to learning (probably because my model is not too deep), 
+while it increases the inference time. So I removed BatchNorm at the end. 
 
-To combat the overfitting, I modified the model so that ...
+Also as a default option, I used SGD with Momentum, with initial learning rate 0.01, momentum = 0.9 and decay factor = 0.8.
+However with SGD, the model learns very slowly after 2 epochs. The reason was because `keras` reduce the learning rate
+by the decay factor after *every update*, so with a decay rate of 0.8, probably after a few epochs, the learning rate
+already becomes very small. This is surprising for me because I expected `keras` to reduce the learning rate only after
+each epoch.
 
-Then I ... 
+Anyway, I switched to `Nadam` and I don't have to tune the learning rate anymore.
 
-The final step was to run the simulator to see how well the car was driving around track one. There were a few spots where the vehicle fell off the track... to improve the driving behavior in these cases, I ....
+I started with the original input image size of 160 x 318 x 3 (I removed the first and last columns in the images, so 
+ the size of the convolutional layers fit better), and a pretty big model (around 1024 convolutional filters and 2 fully-connected 
+ layers of size 1024). The model was able to fit both the training and validation sets well, so I thought this was easy.
+ 
+Unfortunately, it does poorly when driving in autonomous mode. My suspection was because my laptop doesn't have GPUs,
+so when the model is big, it takes more time to evaluate. This leads to slow respond time when driving in autonomous mode.
+For every frame, the `drive.py` script took about 0.09 seconds to process, and I thought this is unreasonably high.
 
-At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
+I then down-sample the input image to 80 x 160 x 3, reduce the model size significantly. On my laptop, it only takes 
+0.015 seconds to do inference for each frame, which is more reasonable.
+
+However, the vehicle still fails at the first difficult turn. I realized I need to augment the dataset. I was able to 
+make the dataset 6 times bigger using techniques described in the last section.
+
+Keeping the model size the same and train it again on the augmented dataset, 
+the vehicle is able to drive autonomously around the track without leaving the road.
 
 ####2. Final Model Architecture
 
-The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes ...
+The final model architecture (model.py lines 12-43) consisted of a convolution neural network with the following layers and layer sizes:
 
-Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
+- Input: 80 x 160 x 3
+- Convolutional: 32 filters of size 3 x 3, stride 1 x 2
+- Max-pooling: 2 x 2, stride 2 x 2
+- Convolutional: 64 filters of size 3 x 3, stride 2 x 2
+- Max-pooling: 2 x 2, stride 2 x 2
+- Convolutional: 64 filters of size 3 x 3, stride 2 x 2
+- Max-pooling: 2 x 2, stride 2 x 2
+- Convolutional: 128 filters of size 2 x 2
+- Dense: 128 units
+- Dense: 128 units
+- Output: 1
 
-![alt text][image1]
+The total number of parameters is around 34K.
+
+At the time of writing this, I realize that I accidentally put ReLU right after Convolutional layer
+(I believe the standard is Conv -> Pooling -> Non-linearity)
+but since max-pooling and ReLU are commutative, the results should be the same.
 
 ####3. Creation of the Training Set & Training Process
 
-To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
+To capture good driving behavior, I first recorded two laps on track one using center lane driving. 
+Here is an example image of center lane driving:
 
 ![alt text][image2]
 
-I then recorded the vehicle recovering from the left side and right sides of the road back to center so that the vehicle would learn to .... These images show what a recovery looks like starting from ... :
+The images from the left and right cameras are also recorded by the simulator (I use the beta simulator on MacOS).
+Those images record the left side and right sides of the road back to center so that the vehicle would learn to 
+recover from the rear of the road:
 
 ![alt text][image3]
 ![alt text][image4]
+
+To augment the data set, I also flipped images and angles thinking that this would increase the diversity of the dataset.
+ For example, here is an image that has then been flipped:
+
 ![alt text][image5]
-
-Then I repeated this process on track two in order to get more data points.
-
-To augment the data sat, I also flipped images and angles thinking that this would ... For example, here is an image that has then been flipped:
-
 ![alt text][image6]
-![alt text][image7]
 
-Etc ....
+After the collection process, I had around 8000 number of data points.
 
-After the collection process, I had X number of data points. I then preprocessed this data by ...
+For the images collected from the left and right images, the steering angle of those are computed from the correct steering angle as follows:
+ 
+    add_image(center, steering)
+    add_image(center[:, ::-1, :], -steering)
+    
+    if steering < 0:
+        # left turn
+        # we do a soft left turn for the image on the left, and hard left turn for image on the right
+        add_image(left, steering * 0.9)
+        add_image(left[:, ::-1, :], -steering * 0.9)
+        add_image(right, steering * 1.1)
+        add_image(right[:, ::-1, :], -steering * 1.1)
+    else:
+        # right turn
+        # we do a soft right turn for the image on the right, and hard right turn for image on the left
+        add_image(left, steering * 1.1)
+        add_image(left[:, ::-1, :], -steering * 1.1)
+        add_image(right, steering * 0.9)
+        add_image(right[:, ::-1, :], -steering * 0.9)
 
+Using this technique, I was able to obtain around `6 * 8000 = 48000` data samples.
+They are finally randomly shuffled, and 20% of them go to the validation set. 
 
-I finally randomly shuffled the data set and put 20% of the data into a validation set. 
+I used this training data for training the model. The validation set helped determine if the model was over or under fitting. 
+The model seems to converge after 5 epochs, but I use 10 epochs, and record the best model on the validation set.
 
-I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... I used an adam optimizer so that manually training the learning rate wasn't necessary.
+Batch size has always been kept at 64.

@@ -3,13 +3,10 @@ import os
 
 from keras.callbacks import ModelCheckpoint
 from keras.layers import Dense, Activation, Reshape, Conv2D, MaxPooling2D, Input
-# from keras.layers.normalization import BatchNormalization
 from keras.models import Model
 from keras.optimizers import Nadam
 
-from data_beta_reader import data_generator, count_dataset
-# from data_udacity_reader import data_generator, count_dataset
-# from data_reader import data_generator, count_dataset
+from data_reader import data_generator, count_dataset
 
 
 def create_model(input_shape=(80, 160, 3)):
@@ -19,28 +16,26 @@ def create_model(input_shape=(80, 160, 3)):
     x = Activation('relu', name='conv0_act')(x)
     x = MaxPooling2D((2, 2))(x)
 
-    # 39 x 39 x 256
+    # 39 x 39 x 32
     x = Conv2D(64, 3, 3, subsample=(2, 2), bias=False, name='conv1')(x)
     x = Activation('relu', name='conv1_act')(x)
     x = MaxPooling2D((2, 2))(x)
 
-    # 9 x 9 x 256
+    # 9 x 9 x 64
     x = Conv2D(64, 3, 3, subsample=(2, 2), bias=False, name='conv2')(x)
     x = Activation('relu', name='conv2_act')(x)
     x = MaxPooling2D((2, 2))(x)
 
-    # 2 x 2 x 512
+    # 2 x 2 x 64
     x = Conv2D(128, 2, 2, subsample=(2, 2), bias=False, name='conv3')(x)
     x = Activation('relu', name='conv3_act')(x)
 
-    # 1 x 1 x 1024
+    # 1 x 1 x 128
     x = Reshape((128,))(x)
     x = Dense(128, name='ff1')(x)
-    # x = BatchNormalization(name='ff1_bn')(x)
     x = Activation('relu', name='ff1_act')(x)
 
     x = Dense(128, name='ff2')(x)
-    # x = BatchNormalization(name='ff2_bn')(x)
     x = Activation('relu', name='ff2_act')(x)
 
     predictions = Dense(1, activation='linear', name='predictions')(x)
@@ -55,7 +50,6 @@ def train(model_path='model.h5'):
 
     m = create_model(input_shape=input_shape)
 
-    # optimizer = SGD(lr=0.01, momentum=0.9, decay=0.8, nesterov=False)
     optimizer = Nadam()
     m.compile(loss='mean_squared_error', optimizer=optimizer, metrics=[])
 
@@ -75,7 +69,6 @@ def train(model_path='model.h5'):
     score = m.evaluate_generator(data_generator(batch_size=batch_size, input_shape=input_shape, val_set=True),
                                  val_samples=cnts[1], pickle_safe=True)
     print('Validation MSE:', score)
-    # m.save(model_path)
 
     return m, history
 

@@ -79,7 +79,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Remote Driving')
     parser.add_argument('model', type=str,
                         help='Path to model definition h5. Model should be on the same path.')
-    parser.add_argument('--throttle', '-t', type=float, default=0.4,
+    parser.add_argument('--throttle', '-t', type=float, default=0.2,
                         help='Path to model definition h5. Model should be on the same path.')
     args = parser.parse_args()
 
